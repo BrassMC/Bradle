@@ -1,0 +1,126 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+
+buildscript {
+	dependencies {
+		classpath 'org.codehaus.groovy:groovy-all:3.0.9'
+	}
+}
+
+plugins {
+	id 'idea'
+	id 'maven-publish'
+	id 'groovy-gradle-plugin'
+	id 'com.gradle.plugin-publish' version '0.18.0'
+	id 'com.github.johnrengelman.shadow' version '7.1.2'
+	id 'org.cadixdev.licenser' version '0.6.1'
+}
+
+group = 'io.github.brassmc.bradle'
+
+if (properties.hasProperty("testing")) {
+	version = version + "-testing"
+	println "New version: $version"
+}
+
+configurations {
+	shade
+	implementation.extendsFrom(shade)
+}
+
+repositories {
+	mavenCentral()
+	maven {
+		name 'MC Forge'
+		url 'https://maven.minecraftforge.net'
+	}
+}
+
+license {
+	header = rootProject.file('LICENSE')
+}
+
+dependencies {
+	implementation 'com.google.code.gson:gson:2.9.1'
+
+	shade 'net.minecraftforge:srgutils:0.4.3'
+	implementation 'org.ow2.asm:asm-commons:9.3'
+}
+
+pluginBundle {
+	website = 'https://github.com/BrassMC/Bradle'
+	vcsUrl = 'https://github.com/BrassMC/Bradle'
+}
+
+gradlePlugin {
+	plugins {
+		bradle {
+			id = 'io.github.brassmc.bradle'
+			displayName = 'Bradle'
+			description = 'A Gradle plugin for BrassMC development'
+			implementationClass = 'io.github.brassmc.bradle.Bradle'
+		}
+	}
+}
+
+publishing {
+	publications {
+		pluginMaven(MavenPublication) {
+			pom.withXml { node ->
+				node.asNode().dependencies
+						.'*'
+						.findAll { it.groupId.text().contains('forge') }
+						.each { it.parent().remove(it) }
+			}
+		}
+	}
+	repositories {
+		maven {
+			name = 'BrassMC'
+			url = 'https://repo.repsy.io/mvn/brassmc/public'
+			credentials {
+				username = findProperty('brassMcUser') ?: ''
+				password = findProperty('brassMcPassword') ?: ''
+			}
+		}
+	}
+}
+
+tasks.create('relocateShadowJar', ConfigureShadowRelocation) {
+	target(tasks.shadowJar)
+	prefix('io.github.brassmc.bradle.shaded')
+}
+
+tasks.named('shadowJar', ShadowJar).configure {
+	from 'LICENSE'
+	archiveClassifier.set('')
+	configurations = [project.configurations.shade]
+	dependsOn('relocateShadowJar')
+	manifest.attributes(makeAttributes())
+}
+
+jar {
+	from 'LICENSE'
+	classifier 'lite'
+	manifest.attributes makeAttributes()
+}
+
+Map<?, ?> makeAttributes() {
+	final var actualDateTime = OffsetDateTime.now(ZoneOffset.UTC).withNano(0)
+	final var currentDateTime = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(actualDateTime)
+	return [
+		'Maven-Artifact'          : "${project.group}:${archivesBaseName}:${project.version}",
+		'Specification-Title'     : archivesBaseName,
+		'Specification-Vendor'    : 'BrassMC',
+		'Specification-Version'   : '1',
+		'Implementation-Title'    : archivesBaseName,
+		'Implementation-Version'  : "${project.version}",
+		'Implementation-Vendor'   : 'BrassMC',
+		'Implementation-Timestamp': currentDateTime,
+		'Built-On-Java'           : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})"
+	]
+}

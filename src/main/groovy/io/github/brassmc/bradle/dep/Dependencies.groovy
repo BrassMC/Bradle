@@ -1,0 +1,57 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 BrassMC
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package io.github.brassmc.bradle.dep
+
+
+import io.github.brassmc.bradle.Bradle
+import io.github.brassmc.bradle.mc.MinecraftExtension
+import io.github.brassmc.bradle.util.gson.PistonMeta
+import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.plugins.JavaPlugin
+
+class Dependencies {
+
+    static void configure(Project project, Configuration mcConf, MinecraftExtension mc) {
+        project.afterEvaluate {
+            final var version = PistonMeta.Store.getVersion(mc.getMinecraftVersion().get())
+            version.resolvePackage().libraries.each {
+                if (!it.canContinue()) return
+                mcConf.dependencies.add project.dependencies.create(it.name)
+            }
+        }
+        project.repositories.maven { MavenArtifactRepository repo ->
+            repo.url = Bradle.MOJANG_MAVEN_URL
+            repo.name = 'Mojang Maven'
+        }
+        project.repositories.mavenCentral()
+
+        project.configurations
+                .findByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
+                .extendsFrom(mcConf)
+    }
+
+}

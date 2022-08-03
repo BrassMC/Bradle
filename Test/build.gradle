@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+    id 'io.github.brassmc.bradle' version '1.0.0'
+}
+minecraft {
+    minecraftVersion = '1.19.1'
+}
+
+repositories {
+    flatDir {
+        dir project.file('mapping_test')
+    }
+}
+
+dependencies {
+    implementation 'test:client:1.0'
+}
+
+afterEvaluate {
+    println configurations.minecraft.resolve()
+}
