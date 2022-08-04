@@ -1,21 +1,31 @@
+import io.github.brassmc.bradle.task.DownloadMCTask
+import io.github.brassmc.bradle.task.RemapJarTask
+
 plugins {
     id 'java'
-    id 'io.github.brassmc.bradle' version '1.0.0'
-}
-minecraft {
-    minecraftVersion = '1.19.1'
+    id 'io.github.brassmc.bradle' version '0.2.1'
 }
 
-repositories {
-    flatDir {
-        dir project.file('mapping_test')
-    }
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    minecraftVersion '1.19.1'
+}
+
+tasks.create('downloadMcClient', DownloadMCTask) {
+    group = 'minecraft'
+    side = 'client'
+    output = project.file('mc/client.jar')
+}
+
+tasks.create('remapMcClient', RemapJarTask) {
+    group = 'minecraft'
+    from(downloadMcClient)
 }
 
 dependencies {
-    implementation 'test:client:1.0'
 }
 
 afterEvaluate {
-    println configurations.minecraft.resolve()
+    println configurations.minecraftRuntime.resolve()
 }

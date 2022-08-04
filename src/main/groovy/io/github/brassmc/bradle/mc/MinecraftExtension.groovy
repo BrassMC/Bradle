@@ -26,6 +26,7 @@ package io.github.brassmc.bradle.mc
 
 import groovy.transform.CompileStatic
 import io.github.brassmc.bradle.util.gson.PistonMeta
+import org.gradle.api.Project
 import org.gradle.api.provider.Property
 
 @CompileStatic
@@ -38,5 +39,9 @@ abstract class MinecraftExtension {
 
     void minecraftVersion(String version) {
         getMinecraftVersion().set(version)
+    }
+
+    static MinecraftExtension get(Project project) {
+        return project.extensions.getByType(MinecraftExtension)
     }
 }

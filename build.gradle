@@ -29,7 +29,7 @@ if (properties.hasProperty("testing")) {
 
 configurations {
 	shade
-	implementation.extendsFrom(shade)
+	compileOnly.extendsFrom(shade)
 }
 
 repositories {
@@ -105,8 +105,8 @@ tasks.named('shadowJar', ShadowJar).configure {
 
 jar {
 	from 'LICENSE'
-	classifier 'lite'
 	manifest.attributes makeAttributes()
+	finalizedBy('shadowJar')
 }
 
 Map<?, ?> makeAttributes() {

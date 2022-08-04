@@ -26,7 +26,34 @@ package io.github.brassmc.bradle.util.gson
 
 import groovy.transform.CompileStatic
 
+import java.nio.file.Files
+import java.nio.file.Path
+
 @CompileStatic
 class MetaPackage {
     List<Library> libraries
+    Downloads downloads
+
+    @CompileStatic
+    static class Downloads {
+        Download client
+        Download client_mappings
+        Download server
+        Download server_mappings
+    }
+
+    @CompileStatic
+    static class Download {
+        String sha1
+        long size
+        String url
+
+        void download(Path location) throws IOException {
+            try (final is = URI.create(url).toURL().openStream()) {
+                Files.deleteIfExists(location)
+                if (location.parent !== null) Files.createDirectories(location.parent)
+                Files.write(location, is.readAllBytes())
+            }
+        }
+    }
 }

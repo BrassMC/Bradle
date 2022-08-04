@@ -44,13 +44,13 @@ import java.util.zip.ZipOutputStream
 
 @CompileStatic
 class MappingApplier {
-    static void apply(IMappingFile mappings, Path file, boolean stripSignature = true) {
+    static void apply(IMappingFile mappings, Path file, Path outPath = null, boolean stripSignature = true) {
         final resolver = new SuperResolvers()
         resolver.resolve(file)
-        apply(mappings, file, resolver, stripSignature)
+        apply(mappings, file, resolver, outPath, stripSignature)
     }
 
-    static void apply(IMappingFile mappings, Path file, SuperResolvers resolver, boolean stripSignature = true) {
+    static void apply(IMappingFile mappings, Path file, SuperResolvers resolver, Path outPath = null, boolean stripSignature = true) {
         final remapper = new Remapper() {
             @Override
             String map(String internalName) {
@@ -99,10 +99,10 @@ class MappingApplier {
             copy(zin, zout)
         }
 
-
-        final outPath = Path.of(file.toAbsolutePath().toString().replace('.jar', '') + '_mapped.jar')
-        try (ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(outPath))
-             ZipInputStream zin = new ZipInputStream(Files.newInputStream(file))) {
+        final actuallyOut = outPath ?: Path.of(file.toAbsolutePath().toString().replace('.jar', '') + '_mapped.jar')
+        final inBytes = Files.readAllBytes(file)
+        try (ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(actuallyOut))
+             ZipInputStream zin = new ZipInputStream(new ByteArrayInputStream(inBytes))) {
             process(processors, defaultProcessor, zin, zout)
         }
     }
