@@ -95,11 +95,11 @@ class Library {
         }
     }
 
-    enum OS {
-        WINDOWS("windows", "win"),
-        LINUX("linux", "linux", "unix"),
-        OSX("osx", "mac"),
-        UNKNOWN("unknown");
+    static enum OS {
+        WINDOWS('windows', 'win'),
+        LINUX('linux', 'linux', 'unix'),
+        OSX('osx', 'mac', 'osx'),
+        UNKNOWN('unknown');
 
         private final String name
         private final String[] keys
@@ -117,7 +117,7 @@ class Library {
             String prop = System.getProperty("os.name").toLowerCase(Locale.ENGLISH)
             for (os in values()) {
                 for (key in os.keys) {
-                    if (key in prop) {
+                    if (prop.contains(key)) {
                         return os
                     }
                 }

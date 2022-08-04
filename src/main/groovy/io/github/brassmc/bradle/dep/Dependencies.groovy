@@ -25,6 +25,7 @@
 package io.github.brassmc.bradle.dep
 
 
+import groovy.transform.CompileStatic
 import io.github.brassmc.bradle.Bradle
 import io.github.brassmc.bradle.mc.MinecraftExtension
 import io.github.brassmc.bradle.util.gson.PistonMeta
@@ -33,6 +34,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.plugins.JavaPlugin
 
+@CompileStatic
 class Dependencies {
 
     static void configure(Project project, Configuration mcConf, MinecraftExtension mc) {
