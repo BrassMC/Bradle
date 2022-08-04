@@ -1,7 +1,7 @@
 # Bradle
 
 ## What is Bradle?
-Bradle is a gradle plugin that imports Minecraft's dependencies and applies the mappings!
+Bradle is a gradle plugin that imports Minecraft's dependencies and applies the mappings! It will be used with [BrassAPI](https://github.com/BrassMC/BrassAPI) and [BrassLoader](https://github.com/BrassMC/BrassLoader)!
 
 ## Who made Bradle?
 Bradle was started by the great Turtle, [TurtyWurty](https://www.youtube.com/TurtyWurty)
