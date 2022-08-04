@@ -1,7 +1,8 @@
 # Bradle
 
 ## What is Bradle?
-Bradle is a gradle plugin that imports Minecraft's dependencies and applies the mappings! It will be used with [BrassAPI](https://github.com/BrassMC/BrassAPI) and [BrassLoader](https://github.com/BrassMC/BrassLoader)!
+Bradle is a Minecraft mod development framework used by Brass for the Gradle build system. 
+
 
 ## Who made Bradle?
 Bradle was started by the great and holy [Matyrobbrt](https://github.com/Matyrobbrt)
@@ -10,4 +11,4 @@ Bradle was started by the great and holy [Matyrobbrt](https://github.com/Matyrob
 The official Server for Bradle is located in Turty's Server [HERE](https://discord.gg/jCTnnhxc7J)
 
 ## Can I help with Bradle?
-Of course! Bradle is for anyone to help develop! Its kinda why its open source
+Of course! Bradle is for anyone to help develop! It's kinda why it's open source. 
