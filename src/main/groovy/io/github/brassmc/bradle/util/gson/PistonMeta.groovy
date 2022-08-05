@@ -72,23 +72,29 @@ class PistonMeta {
     @CompileStatic
     static class Store {
         private static final URL META_URL = URI.create('https://piston-meta.mojang.com/mc/game/version_manifest_v2.json').toURL()
-        static final PistonMeta DATA = {
+        static final PistonMeta DATA = resolveMeta()
+
+        private static PistonMeta resolveMeta() {
             final var cachedPath = Bradle.cachePath.resolve('mojangdata/piston-meta.json')
             if (Bradle.isOffline) {
                 if (!Files.exists(cachedPath)) throw new RuntimeException("No piston meta is cached at $cachedPath! Please disable offline mode")
             } else {
                 try (final var is = META_URL.openStream()) {
-                    if (!Files.exists(cachedPath) || !Arrays.equals(is.readAllBytes(), Files.newInputStream(cachedPath).readAllBytes())) {
+                    final var allBytes = is.readAllBytes()
+                    if (!Files.exists(cachedPath) || !Arrays.equals(allBytes, Files.newInputStream(cachedPath).readAllBytes())) {
                         Files.deleteIfExists(cachedPath)
                         Files.createDirectories(cachedPath.getParent())
-                        Files.write(cachedPath, is.readAllBytes())
+                        Files.write(cachedPath, allBytes)
+                    }
+                    try (final var reader = new InputStreamReader(new ByteArrayInputStream(allBytes))) {
+                        return new Gson().fromJson(reader, PistonMeta)
                     }
                 }
             }
             try (final var is = Files.newBufferedReader(cachedPath)) {
                 return new Gson().fromJson(is, PistonMeta)
             }
-        }.call()
+        }
 
         @Nullable
         static Version getVersion(String id) {

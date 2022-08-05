@@ -5,6 +5,7 @@ import io.github.brassmc.bradle.mapping.MappingApplier
 import net.minecraftforge.srgutils.IMappingFile
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
@@ -13,6 +14,10 @@ import org.gradle.api.tasks.TaskAction
 import java.nio.file.Path
 
 abstract class RemapJarTask extends DefaultTask {
+    RemapJarTask() {
+        stripSignatures.convention(true)
+    }
+
     @InputFile
     abstract RegularFileProperty getInput()
 
@@ -24,6 +29,8 @@ abstract class RemapJarTask extends DefaultTask {
     @OutputFile
     abstract RegularFileProperty getOutput()
 
+    abstract Property<Boolean> getStripSignatures()
+
     @TaskAction
     @CompileStatic
     void run() {
@@ -34,7 +41,7 @@ abstract class RemapJarTask extends DefaultTask {
         final File mappingsIn = getMappings().getOrNull()?.asFile
                 ?: inPath.getParent().resolve(withoutExtension(inFile) + '_mappings.txt').toFile()
         // We need to reverse the proguard mappings
-        MappingApplier.apply(IMappingFile.load(mappingsIn).reverse(), inPath, out, true)
+        MappingApplier.apply(IMappingFile.load(mappingsIn).reverse(), inPath, out, stripSignatures.get())
     }
 
     void from(DownloadMCTask downloadMCTask) {
