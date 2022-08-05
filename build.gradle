@@ -60,7 +60,7 @@ gradlePlugin {
     plugins {
         bradle {
             id = 'io.github.brassmc.bradle'
-            displayName = 'Bradle'1
+            displayName = 'Bradle'
             description = 'A Gradle plugin for BrassMC development'
             implementationClass = 'io.github.brassmc.bradle.Bradle'
         }
