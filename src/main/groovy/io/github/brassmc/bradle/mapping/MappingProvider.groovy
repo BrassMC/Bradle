@@ -31,5 +31,5 @@ import java.nio.file.Path
 
 @CompileStatic
 interface MappingProvider {
-    IMappingFile resolveMappings(Path cachePath, String version)
+    IMappingFile resolveMappings(Path cacheFolder, String version)
 }

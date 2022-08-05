@@ -26,6 +26,8 @@ package io.github.brassmc.bradle
 
 import io.github.brassmc.bradle.dep.Dependencies
 import io.github.brassmc.bradle.mc.MinecraftExtension
+import io.github.brassmc.bradle.task.DownloadAssetsTask
+import io.github.brassmc.bradle.util.gson.Library
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -33,7 +35,8 @@ import java.nio.file.Path
 
 class Bradle implements Plugin<Project> {
     private static final var MC_NAME = 'minecraft'
-    private static final var MC_RUNTIME = 'minecraftRuntime'
+    private static final var MC_CLIENT_RUNTIME = 'minecraftClientRuntime'
+    private static final var MC_SERVER_RUNTIME = 'minecraftServerRuntime'
     public static final var MOJANG_MAVEN_URL = 'https://libraries.minecraft.net'
     public static boolean isOffline = false
     public static Path cachePath
@@ -45,8 +48,25 @@ class Bradle implements Plugin<Project> {
         isOffline = project.gradle.startParameter.offline
         cachePath = project.gradle.gradleUserHomeDir.toPath().resolve('caches/bradle')
         final var mc = project.getExtensions().create(MC_NAME, MinecraftExtension)
-        final var mcConf = project.configurations.create(MC_RUNTIME)
+        final var clientRuntimeConf = project.configurations.create(MC_CLIENT_RUNTIME)
+        final var serverRuntimeConf = project.configurations.create(MC_SERVER_RUNTIME)
 
-        Dependencies.configure project, mcConf, mc
+        Dependencies.configureDeps project, clientRuntimeConf, serverRuntimeConf, mc
+
+        project.tasks.create('downloadAssets', DownloadAssetsTask) {
+            it.setGroup(MC_NAME)
+        }
+    }
+
+    static File getMCDir() {
+        switch (Library.OS.current) {
+            case Library.OS.OSX:
+                return new File(System.getProperty("user.home") + "/Library/Application Support/minecraft")
+            case Library.OS.WINDOWS:
+                return new File(System.getenv("APPDATA") + "\\.minecraft")
+            case Library.OS.LINUX:
+            default:
+                return new File(System.getProperty("user.home") + "/.minecraft")
+        }
     }
 }

@@ -24,7 +24,6 @@
 
 package io.github.brassmc.bradle.dep
 
-
 import groovy.transform.CompileStatic
 import io.github.brassmc.bradle.Bradle
 import io.github.brassmc.bradle.mc.MinecraftExtension
@@ -37,14 +36,7 @@ import org.gradle.api.plugins.JavaPlugin
 @CompileStatic
 class Dependencies {
 
-    static void configure(Project project, Configuration mcConf, MinecraftExtension mc) {
-        project.afterEvaluate {
-            final var version = PistonMeta.Store.getVersion(mc.getMinecraftVersion().get())
-            version.resolvePackage().libraries.each {
-                if (!it.canContinue()) return
-                mcConf.dependencies.add project.dependencies.create(it.name)
-            }
-        }
+    static void configureDeps(Project project, Configuration clientRuntime, Configuration serverRuntime, MinecraftExtension mc) {
         project.repositories.maven { MavenArtifactRepository repo ->
             repo.url = Bradle.MOJANG_MAVEN_URL
             repo.name = 'Mojang Maven'
@@ -53,7 +45,26 @@ class Dependencies {
 
         project.configurations
                 .findByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
-                .extendsFrom(mcConf)
+                .extendsFrom(clientRuntime)
+
+        project.afterEvaluate {
+            final var version = PistonMeta.Store.getVersion(mc.getMinecraftVersion().get())
+            version.resolvePackage().libraries.each {
+                if (!it.canContinue()) return
+                clientRuntime.dependencies.add project.dependencies.create(it.name)
+            }
+
+            version.resolveServerLibraries().each {
+                serverRuntime.dependencies.add project.dependencies.create(it)
+            }
+        }
     }
 
+    static List<String> resolveServerLibraries(String serverLibraries) {
+        serverLibraries.split('\n').toList().stream()
+                .map {it.split(' ') }
+                .filter { it.length == 3}
+                .map { it[1] }
+                .toList()
+    }
 }

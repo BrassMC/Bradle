@@ -3,7 +3,7 @@ import io.github.brassmc.bradle.task.RemapJarTask
 
 plugins {
     id 'java'
-    id 'io.github.brassmc.bradle' version '0.2.1'
+    id 'io.github.brassmc.bradle' version '0.4.0'
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -27,5 +27,5 @@ dependencies {
 }
 
 afterEvaluate {
-    println configurations.minecraftRuntime.resolve()
+    println configurations.minecraftClientRuntime.resolve()
 }

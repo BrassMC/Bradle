@@ -24,24 +24,46 @@
 
 package io.github.brassmc.bradle.mc
 
+import groovy.transform.Canonical
 import groovy.transform.CompileStatic
+import io.github.brassmc.bradle.mapping.MappingProvider
 import io.github.brassmc.bradle.util.gson.PistonMeta
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 
 @CompileStatic
 abstract class MinecraftExtension {
+    private final Map<String, MappingProvider> mappingProviders
     MinecraftExtension() {
-        getMinecraftVersion().convention(PistonMeta.Store.latest())
+        minecraftVersion.convention(PistonMeta.Store.latest())
+        mappings 'official', PistonMeta.Store.latest()
+
+        this.mappingProviders = new HashMap<>()
     }
 
     abstract Property<String> getMinecraftVersion()
+    abstract Property<Mappings> getMappings()
 
     void minecraftVersion(String version) {
         getMinecraftVersion().set(version)
     }
 
+    void mappings(String channel, String version) {
+        mappings.set(new Mappings(channel, version))
+    }
+
+    void registerMappingProvider(String name, MappingProvider mappingProvider) {
+        mappingProviders.put name, mappingProvider
+    }
+
     static MinecraftExtension get(Project project) {
         return project.extensions.getByType(MinecraftExtension)
+    }
+
+    @Canonical
+    @CompileStatic
+    static class Mappings {
+        String channel
+        String version
     }
 }

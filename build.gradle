@@ -48,6 +48,9 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.9.1'
 
     shade 'net.minecraftforge:srgutils:0.4.3'
+    shade('net.minecraftforge:artifactural:3.0.8') {
+        transitive = false
+    }
     implementation 'org.ow2.asm:asm-commons:9.3'
 }
 

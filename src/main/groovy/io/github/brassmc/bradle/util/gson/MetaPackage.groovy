@@ -33,6 +33,7 @@ import java.nio.file.Path
 class MetaPackage {
     List<Library> libraries
     Downloads downloads
+    AssetIndex assetIndex
 
     @CompileStatic
     static class Downloads {
@@ -55,5 +56,11 @@ class MetaPackage {
                 Files.write(location, is.readAllBytes())
             }
         }
+    }
+
+    @CompileStatic
+    static class AssetIndex {
+        String id
+        String url
     }
 }
