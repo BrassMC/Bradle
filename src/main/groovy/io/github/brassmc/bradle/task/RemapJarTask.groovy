@@ -41,6 +41,7 @@ import java.nio.file.Path
 abstract class RemapJarTask extends DefaultTask {
     RemapJarTask() {
         stripSignatures.convention(true)
+        reversedMappings.convention(true)
     }
 
     @InputFile
@@ -58,6 +59,10 @@ abstract class RemapJarTask extends DefaultTask {
     @Optional
     abstract Property<Boolean> getStripSignatures()
 
+    @Input
+    @Optional
+    abstract Property<Boolean> getReversedMappings()
+
     @TaskAction
     @CompileStatic
     void run() {
@@ -67,8 +72,10 @@ abstract class RemapJarTask extends DefaultTask {
                 ?: inPath.getParent().resolve(withoutExtension(inFile) + '_mapped.jar')
         final File mappingsIn = getMappings().getOrNull()?.asFile
                 ?: inPath.getParent().resolve(withoutExtension(inFile) + '_mappings.txt').toFile()
-        // We need to reverse the proguard mappings
-        MappingApplier.apply(IMappingFile.load(mappingsIn).reverse(), inPath, out, stripSignatures.get())
+        IMappingFile mappingFile = IMappingFile.load(mappingsIn)
+        if (reversedMappings.get())
+            mappingFile = mappingFile.reverse()
+        MappingApplier.apply(mappingFile, inPath, out, stripSignatures.get())
     }
 
     void from(DownloadMCTask downloadMCTask) {
