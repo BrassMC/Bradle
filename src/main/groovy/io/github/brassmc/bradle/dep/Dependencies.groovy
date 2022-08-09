@@ -62,7 +62,7 @@ class Dependencies {
 
     static List<String> resolveServerLibraries(String serverLibraries) {
         serverLibraries.split('\n').toList().stream()
-                .map {it.split(' ') }
+                .map {it.split('\t') }
                 .filter { it.length == 3}
                 .map { it[1] }
                 .toList()

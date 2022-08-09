@@ -24,8 +24,10 @@ tasks.create('remapMcClient', RemapJarTask) {
 }
 
 dependencies {
+    implementation 'net.minecraft:client:1.19.1:extra'
+    compileOnly 'net.minecraft:client:1.19.1'
 }
 
 afterEvaluate {
-    println configurations.minecraftClientRuntime.resolve()
+    println configurations.minecraftServerRuntime.resolve()
 }

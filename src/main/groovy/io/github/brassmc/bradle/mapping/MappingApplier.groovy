@@ -185,7 +185,7 @@ class MappingApplier {
         return ein.getName().startsWith("META-INF/") && (ein.getName().endsWith(".SF") || ein.getName().endsWith(".RSA"))
     }
 
-    private static ZipEntry makeNewEntry(ZipEntry oldEntry, String newName = null) {
+    static ZipEntry makeNewEntry(ZipEntry oldEntry, String newName = null) {
         ZipEntry newEntry = new ZipEntry(newName ?: oldEntry.getName())
 
         if (oldEntry.getLastModifiedTime() != null) {

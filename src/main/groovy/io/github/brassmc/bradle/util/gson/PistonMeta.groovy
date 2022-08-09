@@ -25,6 +25,7 @@
 package io.github.brassmc.bradle.util.gson
 
 import com.google.gson.Gson
+import com.google.gson.annotations.Expose
 import groovy.transform.CompileStatic
 import io.github.brassmc.bradle.Bradle
 import io.github.brassmc.bradle.dep.Dependencies
@@ -53,7 +54,13 @@ class PistonMeta {
         String url
         String sha1
 
+        @Expose(deserialize = false)
+        MetaPackage metaPackage
+        @Expose(deserialize = false)
+        List<String> serverLibraries
+
         MetaPackage resolvePackage() {
+            if (metaPackage !== null) return metaPackage
             final var cachedPath = Bradle.cachePath.resolve("mojangdata/packages/$id-${sha1}.json")
             if (Bradle.isOffline) {
                 if (!Files.exists(cachedPath)) throw new RuntimeException("No piston meta package is cached at $cachedPath! Please disable offline mode")
@@ -67,11 +74,12 @@ class PistonMeta {
                 }
             }
             try (final var is = Files.newBufferedReader(cachedPath)) {
-                return new Gson().fromJson(is, MetaPackage)
+                return metaPackage = new Gson().fromJson(is, MetaPackage)
             }
         }
 
         List<String> resolveServerLibraries() {
+            if (serverLibraries !== null) return serverLibraries
             final var pkg = resolvePackage()
             final var cachedPath = Bradle.cachePath.resolve("mojangdata/packages/serverlibs_$id-${sha1}.txt")
             if (Bradle.isOffline) {
@@ -92,7 +100,7 @@ class PistonMeta {
                     }
                 }
             }
-            return Dependencies.resolveServerLibraries(Files.readString(cachedPath))
+            return serverLibraries = Dependencies.resolveServerLibraries(Files.readString(cachedPath))
         }
     }
 

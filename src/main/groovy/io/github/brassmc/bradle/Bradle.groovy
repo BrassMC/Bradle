@@ -25,8 +25,10 @@
 package io.github.brassmc.bradle
 
 import io.github.brassmc.bradle.dep.Dependencies
+import io.github.brassmc.bradle.mc.MCRepo
 import io.github.brassmc.bradle.mc.MinecraftExtension
 import io.github.brassmc.bradle.task.DownloadAssetsTask
+import io.github.brassmc.bradle.util.BaseRepo
 import io.github.brassmc.bradle.util.gson.Library
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -56,6 +58,10 @@ class Bradle implements Plugin<Project> {
         project.tasks.create('downloadAssets', DownloadAssetsTask) {
             it.setGroup(MC_NAME)
         }
+
+        new BaseRepo.Builder()
+            .add(new MCRepo(project.logger))
+            .attach(project)
     }
 
     static File getMCDir() {

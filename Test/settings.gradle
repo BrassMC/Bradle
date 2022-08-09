@@ -3,4 +3,5 @@ pluginManagement {
         gradlePluginPortal()
         mavenLocal()
     }
+    includeBuild('../')
 }

@@ -56,6 +56,10 @@ class MetaPackage {
                 Files.write(location, is.readAllBytes())
             }
         }
+
+        InputStream open() throws IOException {
+            return URI.create(url).toURL().openStream()
+        }
     }
 
     @CompileStatic

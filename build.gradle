@@ -51,6 +51,7 @@ dependencies {
     shade('net.minecraftforge:artifactural:3.0.8') {
         transitive = false
     }
+    shade 'net.minecraftforge:unsafe:0.2.0'
     implementation 'org.ow2.asm:asm-commons:9.3'
 }
 
