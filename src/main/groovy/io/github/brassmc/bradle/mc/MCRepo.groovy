@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 BrassMC
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package io.github.brassmc.bradle.mc
 
 import groovy.transform.CompileDynamic
@@ -11,6 +35,7 @@ import io.github.brassmc.bradle.util.gson.PistonMeta
 import net.minecraftforge.artifactural.api.artifact.ArtifactIdentifier
 import org.slf4j.Logger
 
+import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -35,6 +60,8 @@ class MCRepo extends BaseRepo {
                 return resolveExtra(artifact.version, side)
             } else if (artifact.classifier === null) {
                 return resolveNormal(artifact.version, side)
+            } else if (artifact.classifier == 'joined') {
+                return resolveJoined(artifact.version, side)
             }
         }
 
@@ -81,6 +108,22 @@ class MCRepo extends BaseRepo {
                 out.write(it.data)
                 out.closeEntry()
             }
+        }
+        Utils.prepareForWrite(oldHash)
+        oldHash.write(download.sha1)
+        return path
+    }
+
+    @CompileDynamic
+    private File resolveJoined(String version, String side) throws IOException {
+        final meta = PistonMeta.Store.getVersion(version).resolvePackage()
+        final download = meta.downloads."${side}" as MetaPackage.Download
+        final path = cache('joined', "${side}-${version}.jar")
+        final oldHash = cache('joined', "${side}-${version}.sha1")
+        if (path.exists() && oldHash.exists() && oldHash.getText() == download.sha1) return path
+        try (final inStream = download.open()
+            final outStream = Utils.prepareAndOpenFOS(path)) {
+            inStream.transferTo(outStream)
         }
         Utils.prepareForWrite(oldHash)
         oldHash.write(download.sha1)

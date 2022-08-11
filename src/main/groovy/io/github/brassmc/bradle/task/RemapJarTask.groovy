@@ -84,7 +84,7 @@ abstract class RemapJarTask extends DefaultTask {
 
     static String withoutExtension(File file) {
         final name = file.name
-        if (name.indexOf('.') >= 0) return name.substring(0, name.indexOf('.'))
+        if (name.lastIndexOf('.') >= 0) return name.substring(0, name.lastIndexOf('.'))
         return name
     }
 }

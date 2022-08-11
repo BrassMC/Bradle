@@ -22,14 +22,25 @@
  * SOFTWARE.
  */
 
-package io.github.brassmc.bradle.mapping
+package io.github.brassmc.bradle.mapping.provider
 
-import groovy.transform.CompileStatic
+import io.github.brassmc.bradle.mapping.deobf.Deobfuscator.Side
+import io.github.brassmc.bradle.util.Utils
+import io.github.brassmc.bradle.util.gson.PistonMeta
 import net.minecraftforge.srgutils.IMappingFile
 
+import java.nio.file.Files
 import java.nio.file.Path
 
-@CompileStatic
-interface MappingProvider {
-    IMappingFile resolveMappings(Path cacheFolder, String version)
+class OfficialMappingsProvider implements MappingProvider {
+    @Override
+    IMappingFile resolveMappings(Path cacheFolder, String version, Side side) {
+        final pkg = PistonMeta.Store.getVersion(version).resolvePackage()
+        final clientPath = cacheFolder.resolve("${side}_${version}.txt")
+        //noinspection GroovyAssignabilityCheck
+        Utils.updateOrDownload(clientPath, pkg.downloads."${side.toString().toLowerCase(Locale.ROOT)}_mappings".url)
+        try (final is = Files.newInputStream(clientPath)) {
+            return IMappingFile.load(is).reverse()
+        }
+    }
 }

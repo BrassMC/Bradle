@@ -25,6 +25,7 @@
 package io.github.brassmc.bradle.mapping
 
 import groovy.transform.CompileStatic
+import io.github.brassmc.bradle.util.Utils
 import net.minecraftforge.srgutils.IMappingFile
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
@@ -44,13 +45,13 @@ import java.util.zip.ZipOutputStream
 
 @CompileStatic
 class MappingApplier {
-    static void apply(IMappingFile mappings, Path file, Path outPath = null, boolean stripSignature = true) {
+    static Path apply(IMappingFile mappings, Path file, Path outPath = null, boolean stripSignature = true) {
         final resolver = new SuperResolvers()
         resolver.resolve(file)
         apply(mappings, file, resolver, outPath, stripSignature)
     }
 
-    static void apply(IMappingFile mappings, Path file, SuperResolvers resolver, Path outPath = null, boolean stripSignature = true) {
+    static Path apply(IMappingFile mappings, Path file, SuperResolvers resolver, Path outPath = null, boolean stripSignature = true) {
         final remapper = new Remapper() {
             @Override
             String map(String internalName) {
@@ -105,6 +106,7 @@ class MappingApplier {
              ZipInputStream zin = new ZipInputStream(new ByteArrayInputStream(inBytes))) {
             process(processors, defaultProcessor, zin, zout)
         }
+        return actuallyOut
     }
 
     private static void process(List<ZipEntryProcessor> processors, ZipWritingConsumer defaultProcessor, ZipInputStream zin, ZipOutputStream zout) throws IOException {

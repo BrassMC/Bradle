@@ -26,12 +26,16 @@ package io.github.brassmc.bradle.mc
 
 import groovy.transform.Canonical
 import groovy.transform.CompileStatic
-import io.github.brassmc.bradle.mapping.MappingProvider
+import io.github.brassmc.bradle.mapping.provider.MappingProvider
+import io.github.brassmc.bradle.mapping.provider.OfficialMappingsProvider
 import io.github.brassmc.bradle.util.gson.PistonMeta
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 
+import javax.annotation.Nullable
+
 @CompileStatic
+@SuppressWarnings('unused')
 abstract class MinecraftExtension {
     private final Map<String, MappingProvider> mappingProviders
     MinecraftExtension() {
@@ -39,6 +43,8 @@ abstract class MinecraftExtension {
         mappings 'official', PistonMeta.Store.latest()
 
         this.mappingProviders = new HashMap<>()
+
+        registerMappingProvider('official', new OfficialMappingsProvider())
     }
 
     abstract Property<String> getMinecraftVersion()
@@ -56,6 +62,11 @@ abstract class MinecraftExtension {
         mappingProviders.put name, mappingProvider
     }
 
+    @Nullable
+    MappingProvider getProvider(String name) {
+        return mappingProviders[name]
+    }
+
     static MinecraftExtension get(Project project) {
         return project.extensions.getByType(MinecraftExtension)
     }
@@ -65,5 +76,10 @@ abstract class MinecraftExtension {
     static class Mappings {
         String channel
         String version
+
+        Mappings(String channel, String version) {
+            this.channel = channel
+            this.version = version
+        }
     }
 }

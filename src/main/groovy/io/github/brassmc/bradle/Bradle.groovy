@@ -25,6 +25,8 @@
 package io.github.brassmc.bradle
 
 import io.github.brassmc.bradle.dep.Dependencies
+import io.github.brassmc.bradle.mapping.deobf.DeobfuscatingRepo
+import io.github.brassmc.bradle.mapping.deobf.SimpleDeobfuscator
 import io.github.brassmc.bradle.mc.MCRepo
 import io.github.brassmc.bradle.mc.MinecraftExtension
 import io.github.brassmc.bradle.task.DownloadAssetsTask
@@ -59,9 +61,17 @@ class Bradle implements Plugin<Project> {
             it.setGroup(MC_NAME)
         }
 
-        new BaseRepo.Builder()
-            .add(new MCRepo(project.logger))
-            .attach(project)
+        final obfConfiguration = project.configurations.create('bradleObfuscated')
+        final bradleExt = project.extensions.create(BradleExtension.NAME, BradleExtension, project, obfConfiguration)
+        project.afterEvaluate {
+            bradleExt.mappingsConfiguredListeners.each {it.accept(mc.getMappings().get())}
+            new BaseRepo.Builder()
+                    .add(new MCRepo(project.logger))
+                    .add(new DeobfuscatingRepo(project.logger, obfConfiguration, new SimpleDeobfuscator(mc)))
+                    .attach(project)
+
+            Dependencies.configureMavens(project)
+        }
     }
 
     static File getMCDir() {

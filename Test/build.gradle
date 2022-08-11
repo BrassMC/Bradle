@@ -3,13 +3,14 @@ import io.github.brassmc.bradle.task.RemapJarTask
 
 plugins {
     id 'java'
-    id 'io.github.brassmc.bradle' version '0.4.0'
+    id 'io.github.brassmc.bradle' version '0.5.0'
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
     minecraftVersion '1.19.1'
+    mappings 'official', '1.19.1'
 }
 
 tasks.create('downloadMcClient', DownloadMCTask) {
@@ -23,11 +24,15 @@ tasks.create('remapMcClient', RemapJarTask) {
     from(downloadMcClient)
 }
 
+configurations {
+    ssss
+}
+
 dependencies {
     implementation 'net.minecraft:client:1.19.1:extra'
-    compileOnly 'net.minecraft:client:1.19.1'
+    ssss bradle.deobf('net.minecraft:client:1.19.1:joined')
 }
 
 afterEvaluate {
-    println configurations.minecraftServerRuntime.resolve()
+    println configurations.ssss.resolve()
 }

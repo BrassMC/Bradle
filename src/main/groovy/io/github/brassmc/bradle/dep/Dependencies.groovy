@@ -37,12 +37,6 @@ import org.gradle.api.plugins.JavaPlugin
 class Dependencies {
 
     static void configureDeps(Project project, Configuration clientRuntime, Configuration serverRuntime, MinecraftExtension mc) {
-        project.repositories.maven { MavenArtifactRepository repo ->
-            repo.url = Bradle.MOJANG_MAVEN_URL
-            repo.name = 'Mojang Maven'
-        }
-        project.repositories.mavenCentral()
-
         project.configurations
                 .findByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
                 .extendsFrom(clientRuntime)
@@ -58,6 +52,14 @@ class Dependencies {
                 serverRuntime.dependencies.add project.dependencies.create(it)
             }
         }
+    }
+
+    static void configureMavens(Project project) {
+        project.repositories.maven { MavenArtifactRepository repo ->
+            repo.url = Bradle.MOJANG_MAVEN_URL
+            repo.name = 'Mojang Maven'
+        }
+        project.repositories.mavenCentral()
     }
 
     static List<String> resolveServerLibraries(String serverLibraries) {
