@@ -134,15 +134,12 @@ class MCRepo extends BaseRepo {
     private static InputStream getIs(String version, String side) {
         final meta = PistonMeta.Store.getVersion(version).resolvePackage()
         final download = meta.downloads."${side}" as MetaPackage.Download
-        println 'Attempting download: ' + side
         if (side == 'server') {
             try (final is = download.open()
                  final jarIs = new JarInputStream(is)) {
-                println 'opened IS'
                 ZipEntry ein
                 while ((ein = jarIs.nextEntry) != null) {
                     if (ein.name.startsWith('META-INF/versions') && ein.name.contains('server') && ein.name.endsWith('.jar')) {
-                        println "Found entry: ${ein.name}"
                         return new ByteArrayInputStream(jarIs.readAllBytes())
                     }
                 }
