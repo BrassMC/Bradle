@@ -35,7 +35,7 @@ import io.github.brassmc.bradle.util.gson.PistonMeta
 import net.minecraftforge.artifactural.api.artifact.ArtifactIdentifier
 import org.slf4j.Logger
 
-import java.nio.file.Files
+import java.util.jar.JarInputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -75,7 +75,7 @@ class MCRepo extends BaseRepo {
         final path = cache('extra', "${side}-${version}.jar")
         final oldHash = cache('extra', "${side}-${version}.sha1")
         if (path.exists() && oldHash.exists() && oldHash.getText() == download.sha1) return path
-        try (final jarIs = new ZipInputStream(download.open())
+        try (final jarIs = new ZipInputStream(getIs(version, side))
             final out = new ZipOutputStream(Utils.prepareAndOpenFOS(path))) {
             final entries = Utils.collectEntries(jarIs,
                     (ZipEntry entry) -> !entry.name.endsWith('.class') && !entry.name.endsWith('.SF'))
@@ -98,7 +98,7 @@ class MCRepo extends BaseRepo {
         final path = cache(side, "${version}.jar")
         final oldHash = cache(side, "${version}.sha1")
         if (path.exists() && oldHash.exists() && oldHash.getText() == download.sha1) return path
-        try (final jarIs = new ZipInputStream(download.open())
+        try (final jarIs = new ZipInputStream(getIs(version, side))
             final out = new ZipOutputStream(Utils.prepareAndOpenFOS(path))) {
             final entries = Utils.collectEntries(jarIs,
                     (ZipEntry entry) -> entry.name.endsWith('.class') || entry.name.startsWith('META-INF/'))
@@ -121,7 +121,7 @@ class MCRepo extends BaseRepo {
         final path = cache('joined', "${side}-${version}.jar")
         final oldHash = cache('joined', "${side}-${version}.sha1")
         if (path.exists() && oldHash.exists() && oldHash.getText() == download.sha1) return path
-        try (final inStream = download.open()
+        try (final inStream = getIs(version, side)
             final outStream = Utils.prepareAndOpenFOS(path)) {
             inStream.transferTo(outStream)
         }
@@ -130,4 +130,24 @@ class MCRepo extends BaseRepo {
         return path
     }
 
+    @CompileDynamic
+    private static InputStream getIs(String version, String side) {
+        final meta = PistonMeta.Store.getVersion(version).resolvePackage()
+        final download = meta.downloads."${side}" as MetaPackage.Download
+        println 'Attempting download: ' + side
+        if (side == 'server') {
+            try (final is = download.open()
+                 final jarIs = new JarInputStream(is)) {
+                println 'opened IS'
+                ZipEntry ein
+                while ((ein = jarIs.nextEntry) != null) {
+                    if (ein.name.startsWith('META-INF/versions') && ein.name.contains('server') && ein.name.endsWith('.jar')) {
+                        println "Found entry: ${ein.name}"
+                        return new ByteArrayInputStream(jarIs.readAllBytes())
+                    }
+                }
+            }
+        }
+        return download.open()
+    }
 }
