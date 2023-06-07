@@ -94,7 +94,7 @@ publishing {
     }
 }
 
-tasks.create('relocateShadowJar', ConfigureShadowRelocation) {
+tasks.register('relocateShadowJar', ConfigureShadowRelocation) {
     target(tasks.shadowJar)
     prefix('io.github.brassmc.bradle.shaded')
 }

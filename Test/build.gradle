@@ -30,7 +30,7 @@ configurations {
 
 dependencies {
     implementation 'net.minecraft:client:1.19.1:extra'
-    ssss bradle.deobf('net.minecraft:client:1.19.1')
+    compileOnly bradle.deobf('net.minecraft:client:1.19.1')
 }
 
 afterEvaluate {
